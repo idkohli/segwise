@@ -76,7 +76,7 @@ def query_data(
                 query = query.filter(getattr(GameData, field) == value)
             
             elif field == "SupportedLanguages":
-                query = query.filter(GameData.SupportedLanguages.contains([value]))
+                query = query.filter(GameData.SupportedLanguages.contains(value))
             else:
                 query = query.filter(getattr(GameData, field).like(f"%{value}%"))
 
