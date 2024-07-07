@@ -39,7 +39,6 @@ def convert_row_to_game_data(row: dict) -> GameDataCreate:
     )
 
 def download_csv(url: str):
-    # TODO: The csv is a google sheet. I don't think requests.get() will give access to data.
     csv_url = get_google_sheet_csv_url(url)
     response = requests.get(csv_url)
     response.raise_for_status()
@@ -47,9 +46,16 @@ def download_csv(url: str):
 
 def parse_csv(csv_file, db: Session):
     reader = csv.DictReader(csv_file)
-    # TODO: Ensure duplicate entries (identified by App ID) are ignored.
+
     for row in reader:
         game_data = convert_row_to_game_data(row)
+        
+        # Ensures that a particular game is added only once. Identified by its AppID.
+        app_id = game_data.AppID
+        game_exists = db.query(GameData).filter(GameData.AppID == app_id).first()
+        if game_exists:
+            continue
+
         db_game_data = GameData(**game_data.model_dump())
         db.add(db_game_data)
     db.commit()

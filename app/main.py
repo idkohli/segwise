@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+import json
+from fastapi import FastAPI, Depends, HTTPException, status, Query
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
 from app.sql_app.database import get_db, engine
@@ -43,9 +44,9 @@ def upload_csv(
 
 @app.get("/query")
 def query_data(
+    filters: str = Query({}),
     credentials: HTTPBasicCredentials = Depends(security),
     db: Session = Depends(get_db),
-    **filters,
 ):
     # Auth
     if credentials.username != "admin" or credentials.password != "password":
@@ -57,7 +58,9 @@ def query_data(
 
     query = db.query(GameData)
 
-    for field, value in filters.items():
+    filters_dict = json.loads(filters)
+
+    for field, value in filters_dict.items():
         # TODO: See if anything else needs to be done for date.
         if hasattr(GameData, field):
             if field in [
@@ -71,6 +74,9 @@ def query_data(
                 "ReleaseDate"
             ]:
                 query = query.filter(getattr(GameData, field) == value)
+            
+            elif field == "SupportedLanguages":
+                query = query.filter(GameData.SupportedLanguages.contains([value]))
             else:
                 query = query.filter(getattr(GameData, field).like(f"%{value}%"))
 

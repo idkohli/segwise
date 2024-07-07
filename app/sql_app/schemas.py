@@ -9,7 +9,7 @@ class GameDataCreate(BaseModel):
     Price: Optional[float] = None
     DLCCount: Optional[int] = None
     AboutTheGame: Optional[str] = None
-    SupportedLanguages: Optional[str] = None
+    SupportedLanguages: Optional[list] = None
     Windows: Optional[str] = None
     Mac: Optional[str] = None
     Linux: Optional[str] = None
