@@ -1,5 +1,6 @@
 import csv
 import requests
+import ast
 from io import StringIO
 from sqlalchemy.orm import Session
 from app.sql_app.models import GameData
@@ -24,7 +25,7 @@ def convert_row_to_game_data(row: dict) -> GameDataCreate:
         Price=float(row['Price']) if row['Price'] else None,
         DLCCount=int(row['DLC count']) if row['DLC count'] else None,
         AboutTheGame=row['About the game'],
-        SupportedLanguages=row['Supported languages'],
+        SupportedLanguages=ast.literal_eval(row['Supported languages']),
         Windows=row['Windows'],
         Mac=row['Mac'],
         Linux=row['Linux'],
@@ -49,7 +50,7 @@ def parse_csv(csv_file, db: Session):
 
     for row in reader:
         game_data = convert_row_to_game_data(row)
-        
+
         # Ensures that a particular game is added only once. Identified by its AppID.
         app_id = game_data.AppID
         game_exists = db.query(GameData).filter(GameData.AppID == app_id).first()
