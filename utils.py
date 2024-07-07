@@ -3,8 +3,8 @@ import requests
 import ast
 from io import StringIO
 from sqlalchemy.orm import Session
-from app.sql_app.models import GameData
-from app.sql_app.schemas import GameDataCreate
+from sql_app.models import GameData
+from sql_app.schemas import GameDataCreate
 
 
 def get_google_sheet_csv_url(sheet_url: str) -> str:

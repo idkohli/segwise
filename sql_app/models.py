@@ -1,5 +1,5 @@
 from sqlalchemy import JSON, Column, Integer, String, Float
-from app.sql_app.database import Base
+from sql_app.database import Base
 
 
 class GameData(Base):

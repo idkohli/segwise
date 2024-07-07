@@ -2,9 +2,9 @@ import json
 from fastapi import FastAPI, Depends, HTTPException, status, Query
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
-from app.sql_app.database import get_db, engine
-from app.utils import download_csv, parse_csv
-from app.sql_app.models import GameData, Base
+from sql_app.database import get_db, engine
+from utils import download_csv, parse_csv
+from sql_app.models import GameData, Base
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 
