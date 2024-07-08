@@ -1,4 +1,5 @@
 import json
+import logging
 from fastapi import FastAPI, Depends, HTTPException, status, Query
 from contextlib import asynccontextmanager
 from sqlalchemy.orm import Session
@@ -8,20 +9,22 @@ from sql_app.models import GameData, Base
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 
-# Application startup
-@asynccontextmanager
-async def lifespan(application: FastAPI):
-    Base.metadata.create_all(bind=engine)
-    yield
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+app = FastAPI()
 
-app = FastAPI(lifespan=lifespan)
+# Application startup initializes the db.
+Base.metadata.create_all(bind=engine)
+
 
 security = HTTPBasic()
+
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+
 
 @app.post("/upload")
 def upload_csv(
@@ -29,7 +32,7 @@ def upload_csv(
     credentials: HTTPBasicCredentials = Depends(security),
     db: Session = Depends(get_db),
 ):
-    # Auth
+    # Baisc auth
     if credentials.username != "admin" or credentials.password != "password":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -48,7 +51,7 @@ def query_data(
     credentials: HTTPBasicCredentials = Depends(security),
     db: Session = Depends(get_db),
 ):
-    # Auth
+    # Basic auth
     if credentials.username != "admin" or credentials.password != "password":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -58,25 +61,33 @@ def query_data(
 
     query = db.query(GameData)
 
+    # Convert json str into a useable dictionary
     filters_dict = json.loads(filters)
 
+    # Goes through each filter item and updates db query.
     for field, value in filters_dict.items():
-        # TODO: See if anything else needs to be done for date.
         if hasattr(GameData, field):
+            # Query all games that exactly match the filter value.
             if field in [
                 "AppID",
                 "RequiredAge",
                 "Price",
                 "DLCCount",
+                "Windows",
+                "Mac",
+                "Linux",
                 "Positive",
                 "Negative",
                 "ScoreRank",
-                "ReleaseDate"
+                "ReleaseDate",
             ]:
                 query = query.filter(getattr(GameData, field) == value)
             
+            # Query all games that support the language filtered by.
             elif field == "SupportedLanguages":
                 query = query.filter(GameData.SupportedLanguages.contains(value))
+
+            # Query all games that have a substring of the filter value.
             else:
                 query = query.filter(getattr(GameData, field).like(f"%{value}%"))
 
@@ -86,8 +97,5 @@ def query_data(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        app, 
-        host="0.0.0.0", 
-        port=8000
-    )
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

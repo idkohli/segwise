@@ -1,19 +1,14 @@
 # Game Analytics Web Service
 
-This web service allows data analysts to upload a CSV file containing game data and run analyses on it. The service is built with FastAPI and uses SQLite for the database. It supports filtering and querying game data based on various fields.
+This web service allows data analysts to upload a CSV file containing game data and run analysis on it. 
+The service is built with FastAPI and uses SQLite as database. It aggregates csv data every time a CSV file is uploaded. Data analysts can query data across all the entries. Each entry is unique on the basis of its AppID.
 
 ## Features
 
 - Upload CSV data via an API endpoint
-- Query game data based on filters
-- Simple authentication (optional)
+- Query game data using filters
+- Simple authentication
 - Dockerized deployment
-
-## Requirements
-
-- Python 3.8+
-- SQLite (for local deployment)
-- Docker (for Dockerized deployment)
 
 
 ## Running Locally
@@ -39,7 +34,7 @@ This web service allows data analysts to upload a CSV file containing game data 
 
 4. Start the FastAPI server:
     ```sh
-    uvicorn app.main:app --reload
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ```
 
 
@@ -82,7 +77,3 @@ Query Parameters:
   ```sh
   {"SupportedLanguages": "French"}
   ```
-
-## Cost of Running
-
-Assuming one file upload and 100 queries a day, the cost on a free-tier cloud provider (like Heroku) should be minimal, leveraging the free plan for small projects.
